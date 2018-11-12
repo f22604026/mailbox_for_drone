@@ -84,31 +84,37 @@ def main():
                         time.sleep(waypoints[waypoint_idx,1])
                         waypoint_idx = waypoint_idx +1
 
+
                     print('\nwaypoint '+str(waypoint_idx))
                     print(np.matrix(waypoints[waypoint_idx,:]))
 
                     input_command_3 = raw_input("If you want to go to the waypoint, Enter 'i':")
-                    if input_command_3 != i_test:
-                        sys.exit()
+                    if input_command_3 == i_test:
 
-                    goal_pose_update(waypoint_idx)
-                    #print('Got to publisher')
-                    local_position_pub.publish(goal_pose)
+                        goal_pose_update(waypoint_idx)
+                        #print('Got to publisher')
+                        local_position_pub.publish(goal_pose)
 
-                    check=goal_checker(current_pose.pose.position, goal_pose.pose.position)
+                        check=goal_checker(current_pose.pose.position, goal_pose.pose.position)
 
-                    try:
-                        while check == False:
-                            local_position_pub.publish(goal_pose)
-                            time.sleep(0.1)
-                            check=goal_checker(current_pose.pose.position, goal_pose.pose.position)
-                    except  KeyboardInterrupt:
-                        print("Program Terminated1")
+                        try:
+                            while check == False:
+                                local_position_pub.publish(goal_pose)
+                                time.sleep(0.1)
+                                check=goal_checker(current_pose.pose.position, goal_pose.pose.position)
+                        except  KeyboardInterrupt:
+                            print("Program Terminated1")
 
-                    waypoint_idx = waypoint_idx +1
-
+                        waypoint_idx = waypoint_idx +1
+                    else:
+                        print("kill")
+                        goal_pose.pose.position.x = -4.91
+                        goal_pose.pose.position.y = -1.64
+                        goal_pose.pose.position.z = 0.5
+                        local_position_pub.publish(goal_pose)
                 print("Drone has return.....\n\n")
                 print("=====================================================\n\n")
+
 
 
 
