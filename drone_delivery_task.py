@@ -74,6 +74,9 @@ def main():
             input_command_2 = raw_input("If you want to start the task, Enter 'i':")
 
             waypoint_idx=1
+            #======================================
+            # TASK START
+
             if input_command_2 == i_test:
                 while waypoint_idx < waypoints.shape[0] :
 
@@ -88,6 +91,7 @@ def main():
                     print('\nwaypoint '+str(waypoint_idx))
                     print(np.matrix(waypoints[waypoint_idx,:]))
 
+                    # GO TO NEXT WATPOINT by keyboard input
                     input_command_3 = raw_input("If you want to go to the waypoint, Enter 'i':")
                     if input_command_3 == i_test:
 
@@ -106,6 +110,8 @@ def main():
                             print("Program Terminated1")
 
                         waypoint_idx = waypoint_idx +1
+
+                    # task abort 
                     else:
                         print("kill")
                         goal_pose.pose.position.x = -4.91
