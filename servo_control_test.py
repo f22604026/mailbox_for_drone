@@ -6,6 +6,8 @@ import math
 import mavros_msgs
 import time
 import sys
+import wiringpi
+
 
 from geometry_msgs.msg import PoseStamped
 from mavros_msgs import srv
@@ -41,87 +43,29 @@ def pos_sub_callback(pose_sub_data):
     local_position_pub.publish(goal_pose)
 
 def main():
-    rospy.init_node('Offboard_waypoint_node', anonymous = True)
-    rate = rospy.Rate(20) #publish at 20 Hz
-    local_position_subscribe = rospy.Subscriber('/mavros/mocap/pose', PoseStamped, pos_sub_callback)
+    # use 'GPIO naming'
+    servo_pin =
+    wiringpi.wiringPiSetupGpio()
 
+    # set #18 to be a PWM output
+    wiringpi.pinMode(servo_pin, wiringpi.GPIO.PWM_OUTPUT)
 
+    # set the PWM mode to milliseconds stype
+    wiringpi.pwmSetMode(wiringpi.GPIO.PWM_MODE_MS)
 
-    while not rospy.is_shutdown():
-        print("\n\n Please check the waypoints list: \n\n")
-        print(np.matrix(waypoints))
+    # divide down clock
+    wiringpi.pwmSetClock(192)
+    wiringpi.pwmSetRange(2000)
 
-        print("\n\n")
-        input_command = raw_input("If you want to go to start the drone, Enter 'i' and fire the drone:")
-        i_test = 'i'
+    delay_period = 0.01
 
-        if input_command == i_test :
-            goal_pose_update(0)
-            #print(goal_pose)
-            local_position_pub.publish(goal_pose)
-
-            check=goal_checker(current_pose.pose.position, goal_pose.pose.position)
-
-            try:
-                while check == False:
-                    time.sleep(0.1)
-                    check=goal_checker(current_pose.pose.position, goal_pose.pose.position)
-            except  KeyboardInterrupt:
-                print("Program Terminated1")
-
-            print("Drone is in position and ready to go.....\n\n")
-
-            input_command_2 = raw_input("If you want to start the task, Enter 'i':")
-
-            waypoint_idx=1
-            #======================================
-            # TASK START
-
-            if input_command_2 == i_test:
-                while waypoint_idx < waypoints.shape[0] :
-
-                    #print(waypoints[waypoint_idx,0])
-                    # checking signal to wait
-                    if waypoints[waypoint_idx,0] > 100:
-                        print("\n\nstay there for" + str(waypoints[waypoint_idx,1]) + '...\n\n')
-                        time.sleep(waypoints[waypoint_idx,1])
-                        waypoint_idx = waypoint_idx +1
-
-
-                    print('\nwaypoint '+str(waypoint_idx))
-                    print(np.matrix(waypoints[waypoint_idx,:]))
-
-                    # GO TO NEXT WATPOINT by keyboard input
-                    input_command_3 = raw_input("If you want to go to the waypoint, Enter 'i':")
-                    if input_command_3 == i_test:
-
-                        goal_pose_update(waypoint_idx)
-                        #print('Got to publisher')
-                        local_position_pub.publish(goal_pose)
-
-                        check=goal_checker(current_pose.pose.position, goal_pose.pose.position)
-
-                        try:
-                            while check == False:
-                                local_position_pub.publish(goal_pose)
-                                time.sleep(0.1)
-                                check=goal_checker(current_pose.pose.position, goal_pose.pose.position)
-                        except  KeyboardInterrupt:
-                            print("Program Terminated1")
-
-                        waypoint_idx = waypoint_idx +1
-
-                    # task abort 
-                    else:
-                        print("kill")
-                        goal_pose.pose.position.x = -4.91
-                        goal_pose.pose.position.y = -1.64
-                        goal_pose.pose.position.z = 0.5
-                        local_position_pub.publish(goal_pose)
-                print("Drone has return.....\n\n")
-                print("=====================================================\n\n")
-
-
+    while True:
+            for pulse in range(50, 250, 1):
+                    wiringpi.pwmWrite(servo_pin, pulse)
+                    time.sleep(delay_period)
+            for pulse in range(250, 50, -1):
+                    wiringpi.pwmWrite(servo_pin, pulse)
+                    time.sleep(delay_period)
 
 
 if __name__ == '__main__':
